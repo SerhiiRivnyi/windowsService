@@ -76,16 +76,15 @@ class TestServiceSvc(win32serviceutil.ServiceFramework):
 
     def SvcDoRun(self):
         toLog("--svc do run--")
-        # self.ReportServiceStatus(win32service.SERVICE_START_PENDING)
+        self.ReportServiceStatus(win32service.SERVICE_START_PENDING)
         try:
-            # self.ReportServiceStatus(win32service.SERVICE_RUNNING)
+            self.ReportServiceStatus(win32service.SERVICE_RUNNING)
             servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
                               servicemanager.PYS_SERVICE_STARTED,
                               (self._svc_name_, ''))
-
+            self.__startService()
         except Exception as e:
             toErrorLog("Run error " + str(e))
-        self.__startService()
 
     def __startService(self):
         self.logInfo("Start service")
@@ -137,16 +136,25 @@ class WinServiceManager():
 
         if self.isStandAloneContext() :
 
-            toLog("--start dispatch--" + sys.argv[0])
-            servicemanager.Initialize()
-            toLog("Initialize")
-            servicemanager.PrepareToHostSingle( self.serviceClass_ )
-            toLog("PrepareToHostSingle")
-            servicemanager.Initialize( self.serviceClass_._svc_name_,
-                                       os.path.abspath( servicemanager.__file__ ) )
-            toLog("Initialize with __file__")
+            # toLog("--start dispatch--" + sys.argv[0])
+            # servicemanager.Initialize()
+            # toLog("Initialize")
+            # servicemanager.PrepareToHostSingle( self.serviceClass_ )
+            # toLog("PrepareToHostSingle")
+            # servicemanager.Initialize( self.serviceClass_._svc_name_,
+            #                            os.path.abspath( servicemanager.__file__ ) )
+            # toLog("Initialize with __file__")
+            # try:
+            #     servicemanager.StartServiceCtrlDispatcher()
+            # except Exception as e:
+            #     toErrorLog("start servcie ctrl dispatcher " + str(e))
+            #     removeLogger()
+            #     win32serviceutil.HandleCommandLine(self.serviceClass_, argv=[__file__, "stop"])
+            #     sys.exit(1)
             try:
-                servicemanager.StartServiceCtrlDispatcher()
+                win32serviceutil.StartService(
+                    self.serviceClass_._svc_name_
+                )
             except Exception as e:
                 toErrorLog("start servcie ctrl dispatcher " + str(e))
                 removeLogger()
@@ -249,7 +257,7 @@ def removeInstall():
 
 if __name__ == '__main__':
     isDel = False
-    # isDel = True
+    isDel = True
     isRun = True
     # WinServiceManager(TestServiceSvc).dispatch()
     if isRun:
